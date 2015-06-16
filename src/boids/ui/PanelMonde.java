@@ -1,6 +1,5 @@
 package boids.ui;
 
-import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
@@ -33,7 +32,6 @@ public class PanelMonde extends JPanel {
 				/ monde.getLargeur());
 		g2d.setTransform(t);
 
-		g2d.setColor(Color.red.darker());
 		monde.paint(g2d);
 	}
 }

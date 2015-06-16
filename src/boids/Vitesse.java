@@ -1,14 +1,18 @@
 package boids;
 
-public class Vitesse extends Position implements Cloneable {
+import java.util.Objects;
+
+public class Vitesse extends Position {
 
 	public Vitesse(double x, double y) {
 		super(x, y);
 	}
 
-	@Override
-	public Vitesse clone() {
-		return new Vitesse(getX(), getY());
-	}
+	public Vitesse addSpeed(Vitesse vitesseAAjouter) {
+		Objects.requireNonNull(vitesseAAjouter);
 
+		return new Vitesse(this.getX() + vitesseAAjouter.getX(), this.getY()
+				+ vitesseAAjouter.getY());
+
+	}
 }

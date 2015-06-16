@@ -3,6 +3,8 @@ package boids.ui;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -11,11 +13,8 @@ import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
 
 import boids.Monde;
-import boids.Particule;
-import boids.Position;
-import boids.Vitesse;
 
-public class FrameMain extends JFrame implements Runnable {
+public class FrameMain extends JFrame implements Runnable, WindowListener {
 	private static final long serialVersionUID = -2781658391134900967L;
 
 	private final PanelMonde panel;
@@ -34,6 +33,8 @@ public class FrameMain extends JFrame implements Runnable {
 		JMenu menu = new JMenu("Animation");
 
 		JMenuItem menuStart = new JMenuItem("Start");
+		JMenuItem menuStop = new JMenuItem("Stop");
+
 		menuStart.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S,
 				KeyEvent.CTRL_DOWN_MASK));
 		menuStart.addActionListener(new ActionListener() {
@@ -41,11 +42,12 @@ public class FrameMain extends JFrame implements Runnable {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				animateThread.start();
+				menuStart.setEnabled(false);
+				menuStop.setEnabled(true);
 			}
 		});
 		menu.add(menuStart);
 
-		JMenuItem menuStop = new JMenuItem("Stop");
 		menuStop.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X,
 				KeyEvent.CTRL_DOWN_MASK));
 		menuStop.addActionListener(new ActionListener() {
@@ -53,21 +55,26 @@ public class FrameMain extends JFrame implements Runnable {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				continueAnimate = false;
+				menuStart.setEnabled(true);
+				menuStop.setEnabled(false);
 			}
 		});
+		menuStop.setEnabled(false);
 		menu.add(menuStop);
 
 		menuBar = new JMenuBar();
 		menuBar.add(menu);
 		setJMenuBar(menuBar);
 
+		addWindowListener(this);
 		getContentPane().add(panel);
 	}
 
 	public static void main(String[] args) throws Exception {
-		Monde monde = new Monde();
-		monde.add(new Particule(new Vitesse(1.0, 0.0), new Position(5.0, 0)));
-		monde.add(new Particule(new Vitesse(-1.0, 0.0), new Position(5.0, 9)));
+		Monde monde = new Monde(600, 600);
+		for (int i = 0; i < 4; ++i) {
+			monde.addRandomParticule();
+		}
 
 		FrameMain frame = new FrameMain(monde);
 		frame.setSize(600, 600);
@@ -83,11 +90,40 @@ public class FrameMain extends JFrame implements Runnable {
 			monde.animer();
 			repaint();
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(300);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
+	}
+
+	@Override
+	public void windowActivated(WindowEvent e) {
+	}
+
+	@Override
+	public void windowClosed(WindowEvent e) {
+	}
+
+	@Override
+	public void windowClosing(WindowEvent e) {
+		continueAnimate = false;
+	}
+
+	@Override
+	public void windowDeactivated(WindowEvent e) {
+	}
+
+	@Override
+	public void windowDeiconified(WindowEvent e) {
+	}
+
+	@Override
+	public void windowIconified(WindowEvent e) {
+	}
+
+	@Override
+	public void windowOpened(WindowEvent e) {
 	}
 }
