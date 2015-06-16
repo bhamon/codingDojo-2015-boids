@@ -1,5 +1,6 @@
 package boids;
 
+import java.awt.Graphics;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,17 +10,31 @@ public class Monde {
 
 	private double longueur;
 	private double largeur;
+	private Position spawn;
 
-	public Monde(double longueur, double largeur) {
+	public Monde(double longueur, double largeur, Position spawn) {
 		if (longueur <= 0 || largeur <= 0) {
 			throw new IllegalArgumentException("largeur ou longueur négative");
 		}
 		this.largeur = largeur;
 		this.longueur = longueur;
+		this.spawn = spawn;
 	}
 
 	public Monde() {
 		this(10, 10);
+	}
+
+	public Monde(double longueur, double largeur) {
+		this(longueur, largeur, new Position(0, 0));
+	}
+
+	public double getLongueur() {
+		return longueur;
+	}
+
+	public double getLargeur() {
+		return largeur;
 	}
 
 	public void add(Particule particule) throws OutOfBoundsException {
@@ -27,16 +42,19 @@ public class Monde {
 			throw new IllegalArgumentException(
 					"Particule ne peut pas être null");
 		}
-		
-		Position position = particule.getPosition();
+
+		Particule clonedParticule = (Particule) particule.clone();
+
+		Position position = clonedParticule.getPosition();
 		double px = position.getX();
 		double py = position.getY();
-		
+
 		if (px < 0 || px >= longueur || py < 0 || py >= largeur) {
-			throw new OutOfBoundsException("La particule est en dehors du monde");
+			throw new OutOfBoundsException(
+					"La particule est en dehors du monde");
 		}
-		
-		listParticule.add(particule);
+
+		listParticule.add(clonedParticule);
 	}
 
 	public boolean contains(Particule particule) {
@@ -52,15 +70,14 @@ public class Monde {
 		int iLongueur = (int) longueur;
 		int ilargeur = (int) largeur;
 		int[][] grilleMonde = new int[iLongueur][ilargeur];
-		
+
 		for (Particule particule : listParticule) {
 			int posX = (int) particule.getPosition().getX();
 			int posY = (int) particule.getPosition().getY();
 			grilleMonde[posX][posY] = 1;
 		}
-	
-		
-		for (int y =ilargeur-1 ; y >= 0; y--) {
+
+		for (int y = ilargeur - 1; y >= 0; y--) {
 			for (int x = 0; x < iLongueur; x++) {
 				System.out.print(grilleMonde[x][y]);
 			}
@@ -70,14 +87,28 @@ public class Monde {
 		System.out.println();
 	}
 
+	public void paint(Graphics g) {
+		for (Particule particule : listParticule) {
+			int posX = (int) particule.getPosition().getX();
+			int posY = (int) particule.getPosition().getY();
+			g.fillRect(posX, posY, 1, 1);
+		}
+	}
+
 	public void animer() {
 		for (Particule particule : listParticule) {
 			Position pi = particule.getPosition();
 			Vitesse v = particule.getVitesse();
-			particule.setPosition(new Position(
-					pi.getX() + v.getX(),
-					pi.getY() + v.getY())
-			);
+			particule.setPosition(new Position(pi.getX() + v.getX(), pi.getY()
+					+ v.getY()));
 		}
 	}
+
+	public boolean checkParticuleAtPosition(Position position) {
+
+		return listParticule.stream().anyMatch(
+				particule -> particule.getPosition().equals(position));
+
+	}
+
 }

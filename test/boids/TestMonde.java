@@ -47,44 +47,58 @@ public class TestMonde {
 
 	@Test
 	public void testMondeAvecDeuxParticules() throws OutOfBoundsException {
-		Monde monde = new Monde(10,10);
-		Particule particuleGauche = new Particule(new Vitesse(1.0, 0.0), new Position(5.0, 0));
-		Particule particuleDroite = new Particule(new Vitesse(-1.0, 0.0), new Position(5.0, 9));
+		Monde monde = new Monde(10, 10);
+		Particule particuleGauche = new Particule(new Vitesse(1.0, 0.0),
+				new Position(5.0, 0));
+		Particule particuleDroite = new Particule(new Vitesse(-1.0, 0.0),
+				new Position(5.0, 9));
 		monde.add(particuleDroite);
 		monde.add(particuleGauche);
-		// test ok car l'ajout des deux particules voulues ont été ajoutées correctement.
+		// test ok car l'ajout des deux particules voulues ont été ajoutées
+		// correctement.
 	}
 
-	@Test(expected=OutOfBoundsException.class)
-	public void testHorsMonde() throws OutOfBoundsException{
-		Monde monde = new Monde(10,10);
-		Particule particuleHorsMonde = new Particule(new Vitesse(1.0, 0.0), new Position(11.0, 0));
+	@Test(expected = OutOfBoundsException.class)
+	public void testHorsMonde() throws OutOfBoundsException {
+		Monde monde = new Monde(10, 10);
+		Particule particuleHorsMonde = new Particule(new Vitesse(1.0, 0.0),
+				new Position(11.0, 0));
 		monde.add(particuleHorsMonde);
-		Assert.fail();		
+		Assert.fail();
 	}
-	
+
 	@Test
-	public void testMondeAvecDeuxParticulesAffichage() throws OutOfBoundsException {
-		Monde monde = new Monde(10,10);
-		Particule p1 = new Particule(new Vitesse(1.0, 0.0), new Position(5.0, 0));
-		Particule p2 = new Particule(new Vitesse(-1.0, 0.0), new Position(5.0, 9));
+	public void testMondeAvecDeuxParticulesAffichage()
+			throws OutOfBoundsException {
+		Monde monde = new Monde(10, 10);
+		Particule p1 = new Particule(new Vitesse(1.0, 0.0),
+				new Position(5.0, 0));
+		Particule p2 = new Particule(new Vitesse(-1.0, 0.0), new Position(5.0,
+				9));
 		monde.add(p2);
 		monde.add(p1);
 		monde.print();
 	}
-	
-	
+
 	@Test
-	public void testAnimation1Etape () throws OutOfBoundsException{
-		Monde monde = new Monde(10,10);
+	public void testAnimation1Etape() throws OutOfBoundsException {
+		Monde monde = new Monde(10, 10);
 		Particule p1 = new Particule(new Vitesse(1.0, 0.0), new Position(0, 5));
-		Particule p2 = new Particule(new Vitesse(-1.0, 0.0), new Position(9, 5));
-		monde.add(p2);
 		monde.add(p1);
 		monde.print();
 		monde.animer();
 		monde.print();
-		Assert.assertEquals(new Position(1, 5),p1.getPosition());
-		Assert.assertEquals(new Position(8, 5),p2.getPosition());
+		Assert.assertTrue(monde.checkParticuleAtPosition(new Position(1, 5)));
 	}
+
+	@Test
+	public void testGestionRebord() throws OutOfBoundsException {
+		Position spawn = new Position(0, 0);
+		Monde monde = new Monde(10, 10, spawn);
+		Particule p1 = new Particule(new Vitesse(0.0, 1.0), new Position(0, 9));
+		monde.add(p1);
+		monde.animer();
+		Assert.assertEquals(spawn, p1.getPosition());
+	}
+
 }

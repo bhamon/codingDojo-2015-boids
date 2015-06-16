@@ -1,6 +1,6 @@
 package boids;
 
-public class Position {
+public class Position implements Cloneable {
 
 	private double x;
 	private double y;
@@ -8,6 +8,11 @@ public class Position {
 	public Position(double x, double y) {
 		this.x = x;
 		this.y = y;
+	}
+
+	@Override
+	public Position clone() {
+		return new Position(x, y);
 	}
 
 	@Override

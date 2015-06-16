@@ -1,12 +1,16 @@
 package boids;
 
-
-public class Particule {
+public class Particule implements Cloneable {
 
 	private Vitesse vitesse;
-	
+
 	private Position position;
-	
+
+	@Override
+	public Particule clone() {
+		return new Particule(vitesse.clone(), position.clone());
+	}
+
 	public void setVitesse(Vitesse vitesse) {
 		this.vitesse = vitesse;
 	}
