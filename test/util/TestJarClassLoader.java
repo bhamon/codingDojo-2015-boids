@@ -7,7 +7,7 @@ import java.nio.ByteBuffer;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class JarClassLoaderTest {
+public class TestJarClassLoader {
 
 	private static final File RT_JAR_PATH = new File(System.getProperty("java.home") + "/lib/rt.jar");
 

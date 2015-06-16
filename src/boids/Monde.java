@@ -6,14 +6,17 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import util.Point2D;
+import util.Vector2D;
+
 public class Monde {
 
 	private Map<UUID, Particule> listParticule;
 	private double longueur;
 	private double largeur;
-	private Position spawn;
+	private Point2D spawn;
 
-	public Monde(double longueur, double largeur, Position spawn) {
+	public Monde(double longueur, double largeur, Point2D spawn) {
 		if (longueur <= 0 || largeur <= 0) {
 			throw new IllegalArgumentException("largeur ou longueur négative");
 		}
@@ -29,7 +32,7 @@ public class Monde {
 	}
 
 	public Monde(double longueur, double largeur) {
-		this(longueur, largeur, new Position(longueur / 2, largeur / 2));
+		this(longueur, largeur, new Point2D(longueur / 2.0, largeur / 2.0));
 	}
 
 	public double getLongueur() {
@@ -50,8 +53,7 @@ public class Monde {
 		}
 
 		Particule clonedParticule = (Particule) particule.clone();
-
-		Position position = clonedParticule.getPosition();
+		Point2D position = clonedParticule.getPosition();
 
 		if (!isInBounds(position)) {
 			throw new OutOfBoundsException("La particule est en dehors du monde");
@@ -74,8 +76,8 @@ public class Monde {
 		int[][] grilleMonde = new int[iLongueur][ilargeur];
 
 		for (Particule particule : listParticule.values()) {
-			int posX = (int) particule.getPosition().getX();
-			int posY = (int) particule.getPosition().getY();
+			int posX = (int) particule.getPosition().x;
+			int posY = (int) particule.getPosition().y;
 			grilleMonde[posX][posY] = 1;
 		}
 
@@ -83,6 +85,7 @@ public class Monde {
 			for (int x = 0; x < iLongueur; x++) {
 				System.out.print(grilleMonde[x][y]);
 			}
+
 			System.out.println();
 		}
 
@@ -91,8 +94,8 @@ public class Monde {
 
 	public void paint(Graphics g) {
 		for (Particule particule : listParticule.values()) {
-			int posX = (int) particule.getPosition().getX();
-			int posY = (int) particule.getPosition().getY();
+			int posX = (int) particule.getPosition().x;
+			int posY = (int) particule.getPosition().y;
 			int r2 = (int) particule.getDistanceVision();
 			int d2 = (int) (particule.getDistanceVision() / 2.0);
 			g.setColor(particule.getCouleur());
@@ -117,53 +120,49 @@ public class Monde {
 		// }
 
 		for (Particule particule : listParticule.values()) {
-			Vitesse vitesseRepulsion = new Vitesse(0, 0);
+			Vector2D vitesseRepulsion = new Vector2D();
 			int nb = 0;
 			for (Particule particule2 : listParticule.values()) {
 				if (!particule.equals(particule2) && particule.particuleVoitAutreParticule(particule2)) {
-					Vitesse vtsTemp = particule.getVecteurDistance(particule2);
-					double d = particule.getDistance(particule2);
-					double r = particule.getDistanceVision() - d;
-					// Vitesse v = new Vitesse(vtsTemp.getX()
-					// / (particule.getDistanceVision() - d),
-					// vtsTemp.getY()
-					// / (particule.getDistanceVision() - d));
-					Vitesse v = new Vitesse(vtsTemp.getX() / d * r, vtsTemp.getY() / d * r);
-					vitesseRepulsion = vitesseRepulsion.addSpeed(v);
+					Vector2D vDistance = particule.getPosition().minus(particule2.getPosition());
+					double distance = vDistance.getMagnitude();
+					if (distance == 0.0) {
+						continue;
+					}
+					// double rest = particule.getDistanceVision() - distance;
+					// vitesseRepulsion =
+					// vitesseRepulsion.plus(vDistance.divideBy(distance).multiplyBy(rest));
+					vitesseRepulsion = vitesseRepulsion.plus(vDistance.getNormalized());
 					nb++;
 				}
 			}
 
 			if (nb > 0) {
-				vitesseRepulsion = new Vitesse(vitesseRepulsion.getX() / nb, vitesseRepulsion.getY() / nb);
+				vitesseRepulsion = vitesseRepulsion.divideBy(nb);
 			}
 
-			particule.setVitesse(new Vitesse(vitesseRepulsion.getX() + particule.getVitesse().getX(), vitesseRepulsion.getY()
-					+ particule.getVitesse().getY()));
+			double vitesse = particule.getVitesse().getMagnitude();
+			// particule.setVitesse(particule.getVitesse().plus(vitesseRepulsion.multiplyBy(0.5)));
+			particule.setVitesse(particule.getVitesse().plus(vitesseRepulsion.multiplyBy(2.0)).getNormalized().multiplyBy(vitesse));
 		}
 
 		for (Particule particule : listParticule.values()) {
-
-			Position pi = particule.getPosition();
-			Vitesse v = particule.getVitesse();
-			Position pF = new Position(pi.getX() + v.getX(), pi.getY() + v.getY());
-			if (isInBounds(pF)) {
-				particule.setPosition(pF);
+			Point2D posFinale = particule.getVitesse().translate(particule.getPosition());
+			if (isInBounds(posFinale)) {
+				particule.setPosition(posFinale);
 			} else {
 				particule.setPosition(spawn);
 			}
 		}
 	}
 
-	public boolean checkParticuleAtPosition(Position position) {
-
+	public boolean checkParticuleAtPosition(Point2D position) {
 		return listParticule.values().stream().anyMatch(particule -> particule.getPosition().equals(position));
-
 	}
 
 	public Particule addRandomParticule() {
-		Vitesse vitesse = new Vitesse(5 - Math.random() * 10, 5 - Math.random() * 10);
-		Position position = new Position(Math.random() * longueur, Math.random() * largeur);
+		Vector2D vitesse = new Vector2D(10 - Math.random() * 20, 10 - Math.random() * 20);
+		Point2D position = new Point2D(Math.random() * longueur, Math.random() * largeur);
 		double distanceVision = Math.random() * 100.0;
 		// Color couleur = new Color((float) Math.random(), (float)
 		// Math.random(),
@@ -175,20 +174,18 @@ public class Monde {
 		} catch (OutOfBoundsException e) {
 			e.printStackTrace();
 		}
+
 		return particule.clone();
 	}
 
-	public boolean isInBounds(Position position) {
-
-		double px = position.getX();
-		double py = position.getY();
+	public boolean isInBounds(Point2D position) {
+		double px = position.x;
+		double py = position.y;
 
 		if (px < 0 || px >= longueur || py < 0 || py >= largeur) {
 			return false;
 		}
 
 		return true;
-
 	}
-
 }

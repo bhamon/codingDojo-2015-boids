@@ -4,20 +4,22 @@ import java.awt.Color;
 import java.util.Objects;
 import java.util.UUID;
 
+import util.Point2D;
+import util.Vector2D;
+
 public class Particule implements Cloneable {
 
 	private UUID uuid;
 
-	private Vitesse vitesse;
+	private Vector2D vitesse;
 
-	private Position position;
+	private Point2D position;
 
 	private double distanceVision;
 
 	private Color couleur;
 
-	private Particule(UUID uuid, Vitesse vitesse, Position position,
-			double distanceVision, Color couleur) {
+	private Particule(UUID uuid, Vector2D vitesse, Point2D position, double distanceVision, Color couleur) {
 		this.uuid = uuid;
 		this.setVitesse(vitesse);
 		this.setPosition(position);
@@ -25,8 +27,7 @@ public class Particule implements Cloneable {
 		this.setDistanceVision(distanceVision);
 	}
 
-	public Particule(Vitesse vitesse, Position position, double distanceVision,
-			Color couleur) {
+	public Particule(Vector2D vitesse, Point2D position, double distanceVision, Color couleur) {
 		this(UUID.randomUUID(), vitesse, position, distanceVision, couleur);
 		this.setVitesse(vitesse);
 		this.setPosition(position);
@@ -34,16 +35,38 @@ public class Particule implements Cloneable {
 		this.setDistanceVision(distanceVision);
 	}
 
-	public Particule(Vitesse vitesse, Position position, double distanceVision) {
+	public Particule(Vector2D vitesse, Point2D position, double distanceVision) {
 		this(vitesse, position, distanceVision, Color.RED);
 	}
 
-	public Particule(Vitesse vitesse, Position position) {
-		this(vitesse, position, 1);
+	public Particule(Vector2D vitesse, Point2D position) {
+		this(vitesse, position, 1.0);
 	}
 
 	public Particule() {
-		this(new Vitesse(0, 0), new Position(0, 0));
+		this(new Vector2D(), new Point2D());
+	}
+
+	public UUID getUuid() {
+		return uuid;
+	}
+
+	public Vector2D getVitesse() {
+		return vitesse;
+	}
+
+	public void setVitesse(Vector2D vitesse) {
+		Objects.requireNonNull(vitesse);
+		this.vitesse = vitesse;
+	}
+
+	public Point2D getPosition() {
+		return position;
+	}
+
+	public void setPosition(Point2D position) {
+		Objects.requireNonNull(position);
+		this.position = position;
 	}
 
 	public Color getCouleur() {
@@ -63,33 +86,15 @@ public class Particule implements Cloneable {
 		this.distanceVision = distanceVision;
 	}
 
+	public boolean particuleVoitAutreParticule(Particule particule) {
+		Objects.requireNonNull(particule);
+		return position.minus(particule.position).getMagnitude() <= distanceVision;
+	}
+
 	@Override
 	public Particule clone() {
-		return new Particule(uuid, vitesse, position, distanceVision,
-				new Color(couleur.getRed(), couleur.getGreen(),
-						couleur.getBlue(), couleur.getAlpha()));
-	}
-
-	public void setVitesse(Vitesse vitesse) {
-		Objects.requireNonNull(vitesse);
-		this.vitesse = vitesse;
-	}
-
-	public void setPosition(Position position) {
-		Objects.requireNonNull(position);
-		this.position = position;
-	}
-
-	public UUID getUuid() {
-		return uuid;
-	}
-
-	public Vitesse getVitesse() {
-		return vitesse;
-	}
-
-	public Position getPosition() {
-		return position;
+		return new Particule(uuid, vitesse, position, distanceVision, new Color(couleur.getRed(), couleur.getGreen(), couleur.getBlue(),
+				couleur.getAlpha()));
 	}
 
 	@Override
@@ -101,30 +106,4 @@ public class Particule implements Cloneable {
 		Particule p = (Particule) obj;
 		return p.uuid == uuid;
 	}
-
-	public boolean particuleVoitAutreParticule(Particule particule) {
-		return getDistance(particule) <= distanceVision;
-	}
-
-	public double getDistance(Particule particule) {
-		Objects.requireNonNull(particule);
-
-		double p1x = this.getPosition().getX();
-		double p1y = this.getPosition().getY();
-		double p2x = particule.getPosition().getX();
-		double p2y = particule.getPosition().getY();
-
-		double dx = p1x - p2x;
-		double dy = p1y - p2y;
-
-		return Math.sqrt(dx * dx + dy * dy);
-	}
-
-	public Vitesse getVecteurDistance(Particule particule) {
-		Objects.requireNonNull(particule);
-
-		return new Vitesse(particule.position.getX() - position.getX(),
-				particule.position.getY() - position.getY());
-	}
-
 }
