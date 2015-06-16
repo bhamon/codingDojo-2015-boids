@@ -1,6 +1,5 @@
 package boids.ui;
 
-import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -13,10 +12,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
 
-import util.Point2D;
-import util.Vector2D;
 import boids.Monde;
-import boids.Particule;
 
 public class FrameMain extends JFrame implements Runnable, WindowListener {
 	private static final long serialVersionUID = -2781658391134900967L;
@@ -34,38 +30,49 @@ public class FrameMain extends JFrame implements Runnable, WindowListener {
 
 		Thread animateThread = new Thread(this);
 
-		JMenu menu = new JMenu("Animation");
+		JMenuItem menuItemAnimationStart = new JMenuItem("Start");
+		JMenuItem menuItemAnimationStop = new JMenuItem("Stop");
 
-		JMenuItem menuStart = new JMenuItem("Start");
-		JMenuItem menuStop = new JMenuItem("Stop");
-
-		menuStart.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK));
-		menuStart.addActionListener(new ActionListener() {
+		menuItemAnimationStart.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK));
+		menuItemAnimationStart.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				animateThread.start();
-				menuStart.setEnabled(false);
-				menuStop.setEnabled(true);
+				menuItemAnimationStart.setEnabled(false);
+				menuItemAnimationStop.setEnabled(true);
 			}
 		});
-		menu.add(menuStart);
 
-		menuStop.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X, KeyEvent.CTRL_DOWN_MASK));
-		menuStop.addActionListener(new ActionListener() {
+		menuItemAnimationStop.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X, KeyEvent.CTRL_DOWN_MASK));
+		menuItemAnimationStop.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				continueAnimate = false;
-				menuStart.setEnabled(true);
-				menuStop.setEnabled(false);
+				menuItemAnimationStart.setEnabled(true);
+				menuItemAnimationStop.setEnabled(false);
 			}
 		});
-		menuStop.setEnabled(false);
-		menu.add(menuStop);
+		menuItemAnimationStop.setEnabled(false);
+
+		JMenuItem menuItemBehaviorLoadFromJar = new JMenuItem("Load from JAR");
+		JMenuItem menuItemBehaviorLoadFromScript = new JMenuItem("Load from script");
+
+		menuItemBehaviorLoadFromJar.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L, KeyEvent.CTRL_DOWN_MASK));
+		menuItemBehaviorLoadFromScript.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_M, KeyEvent.CTRL_DOWN_MASK));
+
+		JMenu menuAnimation = new JMenu("Animation");
+		menuAnimation.add(menuItemAnimationStart);
+		menuAnimation.add(menuItemAnimationStop);
+
+		JMenu menuBehavior = new JMenu("Behavior");
+		menuBehavior.add(menuItemBehaviorLoadFromJar);
+		menuBehavior.add(menuItemBehaviorLoadFromScript);
 
 		menuBar = new JMenuBar();
-		menuBar.add(menu);
+		menuBar.add(menuAnimation);
+		menuBar.add(menuBehavior);
 		setJMenuBar(menuBar);
 
 		addWindowListener(this);
@@ -74,10 +81,18 @@ public class FrameMain extends JFrame implements Runnable, WindowListener {
 
 	public static void main(String[] args) throws Exception {
 		Monde monde = new Monde(600, 600);
-		monde.add(new Particule(new Vector2D(1.0, 0.0), new Point2D(50.0, 100.0), 50.0, Color.BLUE.darker()));
-		monde.add(new Particule(new Vector2D(-1.0, 0.0), new Point2D(550.0, 100.0), 50.0, Color.RED.darker()));
-		monde.add(new Particule(new Vector2D(1.0, 0.8), new Point2D(50.0, 300.0), 50.0, Color.GREEN.darker()));
-		monde.add(new Particule(new Vector2D(-1.0, -0.8), new Point2D(550.0, 300.0), 50.0, Color.YELLOW.darker()));
+		// monde.add(new Particule(new Vector2D(1.0, 0.0), new Point2D(50.0,
+		// 100.0), 50.0, Color.BLUE.darker()));
+		// monde.add(new Particule(new Vector2D(-1.0, 0.0), new Point2D(550.0,
+		// 100.0), 50.0, Color.RED.darker()));
+		// monde.add(new Particule(new Vector2D(1.0, 0.8), new Point2D(50.0,
+		// 300.0), 50.0, Color.GREEN.darker()));
+		// monde.add(new Particule(new Vector2D(-1.0, -0.8), new Point2D(550.0,
+		// 300.0), 50.0, Color.YELLOW.darker()));
+
+		for (int i = 0; i < 100; ++i) {
+			monde.addRandomParticule();
+		}
 
 		FrameMain frame = new FrameMain(monde);
 		frame.setSize(600, 600);
@@ -87,16 +102,15 @@ public class FrameMain extends JFrame implements Runnable, WindowListener {
 
 	@Override
 	public void run() {
-		// TODO Auto-generated method stub
 		continueAnimate = true;
 		while (continueAnimate) {
 			monde.animer();
 			repaint();
+
 			try {
 				Thread.sleep(30);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				break;
 			}
 		}
 	}
