@@ -10,8 +10,6 @@ import javax.script.ScriptEngineManager;
 
 import org.apache.commons.io.FileUtils;
 
-import util.Vector2D;
-
 public class BehaviorScript implements Behavior {
 	private final Behavior behavior;
 
@@ -31,8 +29,8 @@ public class BehaviorScript implements Behavior {
 	}
 
 	@Override
-	public Vector2D computeSpeed(Particule ref, List<Particule> aoe) {
-		return behavior.computeSpeed(ref, aoe);
+	public void compute(Particule ref, List<Particule> aoe, MondeCommande mc) throws Exception {
+		behavior.compute(ref, aoe, mc);
 	}
 
 	public static BehaviorScript loadBehaviorFile(String path) throws Exception {

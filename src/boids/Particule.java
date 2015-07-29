@@ -9,42 +9,56 @@ import util.Vector2D;
 
 public class Particule implements Cloneable {
 
-	private UUID uuid;
+	private final UUID uuid;
 
-	private Vector2D vitesse;
+	private Vector2D vitesse = new Vector2D();
 
-	private Point2D position;
+	private Point2D position = new Point2D();
 
-	private double distanceVision;
+	private double distanceVision = 1.0;
 
-	private Color couleur;
+	private boolean shadow = false;
 
-	private Particule(UUID uuid, Vector2D vitesse, Point2D position, double distanceVision, Color couleur) {
-		this.uuid = uuid;
-		this.setVitesse(vitesse);
-		this.setPosition(position);
-		this.setCouleur(couleur);
-		this.setDistanceVision(distanceVision);
-	}
+	private Color couleur = Color.RED;
 
-	public Particule(Vector2D vitesse, Point2D position, double distanceVision, Color couleur) {
-		this(UUID.randomUUID(), vitesse, position, distanceVision, couleur);
-		this.setVitesse(vitesse);
-		this.setPosition(position);
-		this.setCouleur(couleur);
-		this.setDistanceVision(distanceVision);
-	}
-
-	public Particule(Vector2D vitesse, Point2D position, double distanceVision) {
-		this(vitesse, position, distanceVision, Color.RED);
-	}
-
-	public Particule(Vector2D vitesse, Point2D position) {
-		this(vitesse, position, 1.0);
-	}
+	private double dureeVie = Double.POSITIVE_INFINITY;
 
 	public Particule() {
-		this(new Vector2D(), new Point2D());
+		this.uuid = UUID.randomUUID();
+	}
+
+	public Particule(UUID uuid) {
+		this.uuid = uuid;
+	}
+
+	public Particule withVitesse(Vector2D vitesse) {
+		this.setVitesse(vitesse);
+		return this;
+	}
+
+	public Particule withPosition(Point2D position) {
+		this.setPosition(position);
+		return this;
+	}
+
+	public Particule withShadow(boolean shadow) {
+		this.setShadow(shadow);
+		return this;
+	}
+
+	public Particule withDistanceVision(double vision) {
+		this.setDistanceVision(vision);
+		return this;
+	}
+
+	public Particule withCouleur(Color couleur) {
+		this.setCouleur(couleur);
+		return this;
+	}
+
+	public Particule withDureeVie(double dureeVie) {
+		this.setDureeVie(dureeVie);
+		return this;
 	}
 
 	public UUID getUuid() {
@@ -69,6 +83,14 @@ public class Particule implements Cloneable {
 		this.position = position;
 	}
 
+	public boolean isShadow() {
+		return shadow;
+	}
+
+	public void setShadow(boolean shadow) {
+		this.shadow = shadow;
+	}
+
 	public Color getCouleur() {
 		return couleur;
 	}
@@ -86,6 +108,14 @@ public class Particule implements Cloneable {
 		this.distanceVision = distanceVision;
 	}
 
+	public double getDureeVie() {
+		return dureeVie;
+	}
+
+	public void setDureeVie(double dureeVie) {
+		this.dureeVie = dureeVie;
+	}
+
 	public boolean particuleVoitAutreParticule(Particule particule) {
 		Objects.requireNonNull(particule);
 		return position.minus(particule.position).getMagnitude() <= distanceVision;
@@ -93,8 +123,7 @@ public class Particule implements Cloneable {
 
 	@Override
 	public Particule clone() {
-		return new Particule(uuid, vitesse, position, distanceVision, new Color(couleur.getRed(), couleur.getGreen(), couleur.getBlue(),
-				couleur.getAlpha()));
+		return new Particule();
 	}
 
 	@Override

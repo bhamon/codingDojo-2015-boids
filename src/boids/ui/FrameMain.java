@@ -105,10 +105,14 @@ public class FrameMain extends JFrame implements Runnable, WindowListener {
 
 	public static void main(String[] args) throws Exception {
 		Monde monde = new Monde(600, 600);
-		monde.add(new Particule(new Vector2D(1.0, 0.0), new Point2D(50.0, 100.0), 50.0, Color.BLUE.darker()));
-		monde.add(new Particule(new Vector2D(-1.0, 0.0), new Point2D(550.0, 100.0), 50.0, Color.RED.darker()));
-		monde.add(new Particule(new Vector2D(1.0, 0.8), new Point2D(50.0, 300.0), 50.0, Color.GREEN.darker()));
-		monde.add(new Particule(new Vector2D(-1.0, -0.8), new Point2D(550.0, 300.0), 50.0, Color.YELLOW.darker()));
+		monde.add(new Particule().withVitesse(new Vector2D(1.0, 0.0)).withPosition(new Point2D(50.0, 100.0)).withDistanceVision(50.0)
+				.withCouleur(Color.BLUE.darker()));
+		monde.add(new Particule().withVitesse(new Vector2D(-1.0, 0.0)).withPosition(new Point2D(550.0, 100.0)).withDistanceVision(50.0)
+				.withCouleur(Color.RED.darker()));
+		monde.add(new Particule().withVitesse(new Vector2D(1.0, 0.8)).withPosition(new Point2D(50.0, 300.0)).withDistanceVision(50.0)
+				.withCouleur(Color.GREEN.darker()));
+		monde.add(new Particule().withVitesse(new Vector2D(-1.0, -0.8)).withPosition(new Point2D(550.0, 300.0)).withDistanceVision(50.0)
+				.withCouleur(Color.YELLOW.darker()));
 
 		// for (int i = 0; i < 100; ++i) {
 		// monde.addRandomParticule();
@@ -124,7 +128,12 @@ public class FrameMain extends JFrame implements Runnable, WindowListener {
 	public void run() {
 		continueAnimate = true;
 		while (continueAnimate) {
-			monde.animer();
+			try {
+				monde.animer();
+			} catch (Exception e1) {
+
+				e1.printStackTrace();
+			}
 			repaint();
 
 			try {

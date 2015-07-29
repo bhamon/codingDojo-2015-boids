@@ -6,14 +6,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 import util.Point2D;
 import util.Vector2D;
 
-public class Monde {
+public class Monde implements MondeCommande {
 
-	private Map<UUID, Particule> listParticule;
+	private final Map<UUID, Particule> listParticule;
 	private double longueur;
 	private double largeur;
 	private Point2D spawn;
@@ -27,10 +28,10 @@ public class Monde {
 		this.behavior = behavior;
 	}
 
-	private static final Behavior defaultBehavior = new Behavior() {
+	public static final Behavior defaultBehavior = new Behavior() {
 
 		@Override
-		public Vector2D computeSpeed(Particule particule, List<Particule> aoe) {
+		public void compute(Particule particule, List<Particule> aoe, MondeCommande mc) {
 
 			Vector2D vitesseRepulsion = new Vector2D();
 			int nb = 0;
@@ -57,7 +58,8 @@ public class Monde {
 			double vitesse = particule.getVitesse().getMagnitude();
 			// particule.setVitesse(particule.getVitesse().plus(vitesseRepulsion.multiplyBy(0.5)));
 			// TODO Auto-generated method stub
-			return particule.getVitesse().plus(vitesseRepulsion.multiplyBy(2.0)).getNormalized().multiplyBy(vitesse);
+			mc.modifySpeed(particule, particule.getVitesse().plus(vitesseRepulsion.multiplyBy(2.0)).getNormalized().multiplyBy(vitesse));
+
 		}
 	};
 
@@ -98,9 +100,10 @@ public class Monde {
 	}
 
 	public Particule get(UUID uuid) {
-		return listParticule.get(uuid);
+		return listParticule.get(uuid).clone();
 	}
 
+	@Override
 	public void add(Particule particule) throws OutOfBoundsException {
 		if (particule == null) {
 			throw new IllegalArgumentException("Particule ne peut pas être null");
@@ -152,23 +155,29 @@ public class Monde {
 			int posY = (int) particule.getPosition().y;
 			int r2 = (int) particule.getDistanceVision();
 			int d2 = (int) (particule.getDistanceVision() / 2.0);
+			int vX = (int) (particule.getVitesse().x * 10.0);
+			int vY = (int) (particule.getVitesse().y * 10.0);
 			g.setColor(particule.getCouleur());
 			// g.fillRect(posX, posY, 1, 1);
 			g.fillOval(posX - d2, posY - d2, r2, r2);
+			g.setColor(Color.WHITE);
+			g.drawLine(posX, posY, posX + vX, posY + vY);
 		}
 	}
 
-	public void animer() {
-		for (Particule particule : listParticule.values()) {
-
-			List<Particule> areaOfEffect = new ArrayList<Particule>();
-			for (Particule particule2 : listParticule.values()) {
-				if (!particule.equals(particule2) && particule.particuleVoitAutreParticule(particule2)) {
-					areaOfEffect.add(particule2);
+	public void animer() throws Exception {
+		List<Particule> listParticuleClone = new ArrayList<Particule>(listParticule.values());
+		for (Particule particule : listParticuleClone) {
+			if (!particule.isShadow()) {
+				List<Particule> areaOfEffect = new ArrayList<Particule>();
+				for (Particule particule2 : listParticuleClone) {
+					if (!particule2.isShadow() && !particule.equals(particule2) && particule.particuleVoitAutreParticule(particule2)) {
+						areaOfEffect.add(particule2);
+					}
 				}
-			}
 
-			particule.setVitesse(this.behavior.computeSpeed(particule, areaOfEffect));
+				this.behavior.compute(particule, areaOfEffect, this);
+			}
 		}
 
 		for (Particule particule : listParticule.values()) {
@@ -185,6 +194,8 @@ public class Monde {
 					Vector2D vector2d = particule.getVitesse();
 					particule.setVitesse(new Vector2D(vector2d.x, -vector2d.y));
 				}
+
+				particule.setPosition(particule.getVitesse().translate(particule.getPosition()));
 			}
 		}
 	}
@@ -201,7 +212,7 @@ public class Monde {
 		// Math.random(),
 		// (float) Math.random(), 0.4f);
 		Color couleur = new Color(0.0f, 0.0f, (float) distanceVision / 100.0f);
-		Particule particule = new Particule(vitesse, position, distanceVision, couleur);
+		Particule particule = new Particule().withVitesse(vitesse).withPosition(position).withDistanceVision(distanceVision).withCouleur(couleur);
 		try {
 			add(particule);
 		} catch (OutOfBoundsException e) {
@@ -220,6 +231,19 @@ public class Monde {
 		}
 
 		return true;
+	}
+
+	@Override
+	public void modifySpeed(Particule p1, Vector2D vitesseParticule) {
+		Objects.requireNonNull(p1);
+		if (listParticule.containsKey(p1.getUuid())) {
+			listParticule.get(p1.getUuid()).setVitesse(vitesseParticule);
+		}
+
+	}
+
+	public Object getParticulesNb() {
+		return listParticule.size();
 	}
 
 }
