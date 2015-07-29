@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.UUID;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -90,10 +92,27 @@ public class TestMonde {
 	public void testGestionRebord() throws OutOfBoundsException {
 		Point2D spawn = new Point2D(0, 0);
 		Monde monde = new Monde(10, 10, spawn);
-		Particule p1 = new Particule(new Vector2D(0.0, 1.0), new Point2D(0, 9), 1);
+
+		Particule p1 = new Particule(new Vector2D(2.5, 1.5), new Point2D(0, 9), 1);
+		UUID p1UUID = p1.getUuid();
 		monde.add(p1);
 		monde.animer();
-		Assert.assertTrue(monde.checkParticuleAtPosition(spawn));
+		Vector2D vitesseApresRebondP1 = new Vector2D(2.5, -1.5);
+		Assert.assertEquals(vitesseApresRebondP1, monde.get(p1UUID).getVitesse());
+
+		Particule p2 = new Particule(new Vector2D(2.5, 1.5), new Point2D(9, 0), 1);
+		UUID p2UUID = p2.getUuid();
+		monde.add(p2);
+		monde.animer();
+		Vector2D vitesseApresRebondP2 = new Vector2D(-2.5, 1.5);
+		Assert.assertEquals(vitesseApresRebondP2, monde.get(p2UUID).getVitesse());
+
+		Particule p3 = new Particule(new Vector2D(2.5, 1.5), new Point2D(9, 9), 1);
+		UUID p3UUID = p3.getUuid();
+		monde.add(p3);
+		monde.animer();
+		Vector2D vitesseApresRebondP3 = new Vector2D(-2.5, -1.5);
+		Assert.assertEquals(vitesseApresRebondP3, monde.get(p3UUID).getVitesse());
 	}
 
 	@Test
@@ -116,21 +135,23 @@ public class TestMonde {
 
 	}
 
-	@Test
-	public void testRepulsion() throws OutOfBoundsException {
-		Monde monde = new Monde(10, 10);
-		Particule p1 = new Particule(new Vector2D(1.54, -0.97), new Point2D(3.14, 5.09), 1);
-		Particule p2 = new Particule(new Vector2D(-1.1, 1.4), new Point2D(3.12, 5.99), 2);
-
-		monde.add(p1);
-		monde.add(p2);
-
-		monde.animer();
-		Particule p1m = monde.get(p1.getUuid());
-		assertTrue(p1m.getVitesse().equals(new Vector2D(1.52, -0.07)));
-		assertTrue(p1m.getPosition().equals(new Point2D(4.66, 5.02)));
-
-	}
+	// @Test
+	// public void testRepulsion() throws OutOfBoundsException {
+	// Monde monde = new Monde(10, 10);
+	// Particule p1 = new Particule(new Vector2D(1.54, -0.97), new Point2D(3.14,
+	// 5.09), 1);
+	// Particule p2 = new Particule(new Vector2D(-1.1, 1.4), new Point2D(3.12,
+	// 5.99), 2);
+	//
+	// monde.add(p1);
+	// monde.add(p2);
+	//
+	// monde.animer();
+	// Particule p1m = monde.get(p1.getUuid());
+	// assertTrue(p1m.getVitesse().equals(new Vector2D(1.52, -0.07)));
+	// assertTrue(p1m.getPosition().equals(new Point2D(4.66, 5.02)));
+	//
+	// }
 
 	@Test
 	public void testCalculDistance() {
@@ -147,4 +168,9 @@ public class TestMonde {
 
 		assertEquals(p2.getPosition().minus(p1.getPosition()), new Vector2D(0, 1.0));
 	}
+
+	// @Test
+	// public void testLoadJavascriptFile(){
+	// Monde monde = new Monde(10, largeur, spawn, behavior);
+	// }
 }

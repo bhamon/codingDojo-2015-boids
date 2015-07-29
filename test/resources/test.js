@@ -1,0 +1,1 @@
+function computeSpeed(ref, aoe) { return ref.getVitesse(); }

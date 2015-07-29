@@ -2,7 +2,9 @@ package boids;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -15,8 +17,51 @@ public class Monde {
 	private double longueur;
 	private double largeur;
 	private Point2D spawn;
+	private Behavior behavior = defaultBehavior;
 
-	public Monde(double longueur, double largeur, Point2D spawn) {
+	public Behavior getBehavior() {
+		return behavior;
+	}
+
+	public void setBehavior(Behavior behavior) {
+		this.behavior = behavior;
+	}
+
+	private static final Behavior defaultBehavior = new Behavior() {
+
+		@Override
+		public Vector2D computeSpeed(Particule particule, List<Particule> aoe) {
+
+			Vector2D vitesseRepulsion = new Vector2D();
+			int nb = 0;
+
+			for (Particule particule2 : aoe) {
+
+				Vector2D vDistance = particule.getPosition().minus(particule2.getPosition());
+				double distance = vDistance.getMagnitude();
+				if (distance == 0.0) {
+					continue;
+				}
+				// double rest = particule.getDistanceVision() - distance;
+				// vitesseRepulsion =
+				// vitesseRepulsion.plus(vDistance.divideBy(distance).multiplyBy(rest));
+				vitesseRepulsion = vitesseRepulsion.plus(vDistance.getNormalized());
+				nb++;
+
+			}
+
+			if (nb > 0) {
+				vitesseRepulsion = vitesseRepulsion.divideBy(nb);
+			}
+
+			double vitesse = particule.getVitesse().getMagnitude();
+			// particule.setVitesse(particule.getVitesse().plus(vitesseRepulsion.multiplyBy(0.5)));
+			// TODO Auto-generated method stub
+			return particule.getVitesse().plus(vitesseRepulsion.multiplyBy(2.0)).getNormalized().multiplyBy(vitesse);
+		}
+	};
+
+	public Monde(double longueur, double largeur, Point2D spawn, Behavior behavior) {
 		if (longueur <= 0 || largeur <= 0) {
 			throw new IllegalArgumentException("largeur ou longueur négative");
 		}
@@ -25,14 +70,23 @@ public class Monde {
 		this.largeur = largeur;
 		this.longueur = longueur;
 		this.spawn = spawn;
-	}
-
-	public Monde() {
-		this(10, 10);
+		this.behavior = behavior;
 	}
 
 	public Monde(double longueur, double largeur) {
 		this(longueur, largeur, new Point2D(longueur / 2.0, largeur / 2.0));
+	}
+
+	public Monde(double longueur, double largeur, Point2D spawn) {
+		this(longueur, largeur, spawn, defaultBehavior);
+	}
+
+	public Monde(double longueur, double largeur, Behavior behavior) {
+		this(longueur, largeur, new Point2D(longueur / 2.0, largeur / 2.0), behavior);
+	}
+
+	public Monde() {
+		this(10, 10);
 	}
 
 	public double getLongueur() {
@@ -105,45 +159,16 @@ public class Monde {
 	}
 
 	public void animer() {
-		// for (Particule particule : listParticule.values()) {
-		// Vitesse vitesseRepulsion = new Vitesse(0, 0);
-		// for (Particule particule2 : listParticule.values()) {
-		// if (!particule.equals(particule2)
-		// && particule.particuleVoitAutreParticule(particule2)) {
-		// Vitesse distance = particule.getVecteurDistance(particule2);
-		// vitesseRepulsion = vitesseRepulsion.addSpeed(distance);
-		// }
-		// }
-		//
-		// particule.setVitesse(particule.getVitesse().addSpeed(
-		// vitesseRepulsion));
-		// }
-
 		for (Particule particule : listParticule.values()) {
-			Vector2D vitesseRepulsion = new Vector2D();
-			int nb = 0;
+
+			List<Particule> areaOfEffect = new ArrayList<Particule>();
 			for (Particule particule2 : listParticule.values()) {
 				if (!particule.equals(particule2) && particule.particuleVoitAutreParticule(particule2)) {
-					Vector2D vDistance = particule.getPosition().minus(particule2.getPosition());
-					double distance = vDistance.getMagnitude();
-					if (distance == 0.0) {
-						continue;
-					}
-					// double rest = particule.getDistanceVision() - distance;
-					// vitesseRepulsion =
-					// vitesseRepulsion.plus(vDistance.divideBy(distance).multiplyBy(rest));
-					vitesseRepulsion = vitesseRepulsion.plus(vDistance.getNormalized());
-					nb++;
+					areaOfEffect.add(particule2);
 				}
 			}
 
-			if (nb > 0) {
-				vitesseRepulsion = vitesseRepulsion.divideBy(nb);
-			}
-
-			double vitesse = particule.getVitesse().getMagnitude();
-			// particule.setVitesse(particule.getVitesse().plus(vitesseRepulsion.multiplyBy(0.5)));
-			particule.setVitesse(particule.getVitesse().plus(vitesseRepulsion.multiplyBy(2.0)).getNormalized().multiplyBy(vitesse));
+			particule.setVitesse(this.behavior.computeSpeed(particule, areaOfEffect));
 		}
 
 		for (Particule particule : listParticule.values()) {
@@ -151,7 +176,15 @@ public class Monde {
 			if (isInBounds(posFinale)) {
 				particule.setPosition(posFinale);
 			} else {
-				particule.setPosition(spawn);
+				// hors du tableau
+				if (posFinale.x > longueur || posFinale.x < 0) {
+					Vector2D vector2d = particule.getVitesse();
+					particule.setVitesse(new Vector2D(-vector2d.x, vector2d.y));
+				}
+				if (posFinale.y > largeur || posFinale.y < 0) {
+					Vector2D vector2d = particule.getVitesse();
+					particule.setVitesse(new Vector2D(vector2d.x, -vector2d.y));
+				}
 			}
 		}
 	}
@@ -188,4 +221,5 @@ public class Monde {
 
 		return true;
 	}
+
 }

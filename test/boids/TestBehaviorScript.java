@@ -1,6 +1,7 @@
 package boids;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,4 +62,12 @@ public class TestBehaviorScript {
 		assertEquals(2.3, r.x, 0.00001);
 		assertEquals(4.5, r.y, 0.00001);
 	}
+
+	@Test
+	public void testLoadBehaviorFile() throws Exception {
+		String path = "test/resources/test.js";
+		BehaviorScript behaviorScript = BehaviorScript.loadBehaviorFile(path);
+		assertNotNull(behaviorScript);
+	}
+
 }

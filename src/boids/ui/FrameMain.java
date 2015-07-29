@@ -1,18 +1,26 @@
 package boids.ui;
 
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.io.File;
 
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 
+import util.Point2D;
+import util.Vector2D;
+import boids.BehaviorScript;
 import boids.Monde;
+import boids.Particule;
 
 public class FrameMain extends JFrame implements Runnable, WindowListener {
 	private static final long serialVersionUID = -2781658391134900967L;
@@ -69,6 +77,22 @@ public class FrameMain extends JFrame implements Runnable, WindowListener {
 		JMenu menuBehavior = new JMenu("Behavior");
 		menuBehavior.add(menuItemBehaviorLoadFromJar);
 		menuBehavior.add(menuItemBehaviorLoadFromScript);
+		menuItemBehaviorLoadFromScript.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				JFileChooser fileChooser = new JFileChooser(new File("."));
+				int retour = fileChooser.showOpenDialog(FrameMain.this);
+				if (retour == JFileChooser.APPROVE_OPTION) {
+					try {
+						BehaviorScript scriptChosen = BehaviorScript.loadBehaviorFile(fileChooser.getSelectedFile().getAbsolutePath());
+						FrameMain.this.monde.setBehavior(scriptChosen);
+					} catch (Exception e1) {
+						JOptionPane.showMessageDialog(FrameMain.this, "Une erreur s'est produite pendant le chargement : \n" + e1.getMessage());
+					}
+				}
+			}
+		});
 
 		menuBar = new JMenuBar();
 		menuBar.add(menuAnimation);
@@ -81,18 +105,14 @@ public class FrameMain extends JFrame implements Runnable, WindowListener {
 
 	public static void main(String[] args) throws Exception {
 		Monde monde = new Monde(600, 600);
-		// monde.add(new Particule(new Vector2D(1.0, 0.0), new Point2D(50.0,
-		// 100.0), 50.0, Color.BLUE.darker()));
-		// monde.add(new Particule(new Vector2D(-1.0, 0.0), new Point2D(550.0,
-		// 100.0), 50.0, Color.RED.darker()));
-		// monde.add(new Particule(new Vector2D(1.0, 0.8), new Point2D(50.0,
-		// 300.0), 50.0, Color.GREEN.darker()));
-		// monde.add(new Particule(new Vector2D(-1.0, -0.8), new Point2D(550.0,
-		// 300.0), 50.0, Color.YELLOW.darker()));
+		monde.add(new Particule(new Vector2D(1.0, 0.0), new Point2D(50.0, 100.0), 50.0, Color.BLUE.darker()));
+		monde.add(new Particule(new Vector2D(-1.0, 0.0), new Point2D(550.0, 100.0), 50.0, Color.RED.darker()));
+		monde.add(new Particule(new Vector2D(1.0, 0.8), new Point2D(50.0, 300.0), 50.0, Color.GREEN.darker()));
+		monde.add(new Particule(new Vector2D(-1.0, -0.8), new Point2D(550.0, 300.0), 50.0, Color.YELLOW.darker()));
 
-		for (int i = 0; i < 100; ++i) {
-			monde.addRandomParticule();
-		}
+		// for (int i = 0; i < 100; ++i) {
+		// monde.addRandomParticule();
+		// }
 
 		FrameMain frame = new FrameMain(monde);
 		frame.setSize(600, 600);

@@ -1,12 +1,14 @@
 package boids;
 
-import java.util.ArrayList;
+import java.io.File;
 import java.util.List;
 import java.util.Objects;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
+
+import org.apache.commons.io.FileUtils;
 
 import util.Vector2D;
 
@@ -33,11 +35,9 @@ public class BehaviorScript implements Behavior {
 		return behavior.computeSpeed(ref, aoe);
 	}
 
-	public static void main(String[] args) throws Exception {
-		Behavior b = new BehaviorScript("function computeSpeed(ref, aoe) { return ref.getVitesse(); return new Packages.util.Vector2D(2.2, 5.68); }");
-
-		Particule ref = new Particule();
-		List<Particule> aoe = new ArrayList<Particule>();
-		System.out.println(b.computeSpeed(ref, aoe));
+	public static BehaviorScript loadBehaviorFile(String path) throws Exception {
+		Objects.requireNonNull(path);
+		String behaviorScript = FileUtils.readFileToString(new File(path));
+		return new BehaviorScript(behaviorScript);
 	}
 }
