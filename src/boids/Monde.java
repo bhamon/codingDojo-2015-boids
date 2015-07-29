@@ -100,7 +100,12 @@ public class Monde implements MondeCommande {
 	}
 
 	public Particule get(UUID uuid) {
-		return listParticule.get(uuid).clone();
+		Particule particule = listParticule.get(uuid);
+		if (particule == null) {
+			return null;
+		}
+
+		return particule.clone();
 	}
 
 	@Override

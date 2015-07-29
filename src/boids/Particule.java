@@ -123,7 +123,8 @@ public class Particule implements Cloneable {
 
 	@Override
 	public Particule clone() {
-		return new Particule();
+		return new Particule(uuid).withPosition(position).withVitesse(vitesse).withDistanceVision(distanceVision).withDureeVie(dureeVie)
+				.withShadow(shadow).withCouleur(couleur);
 	}
 
 	@Override
