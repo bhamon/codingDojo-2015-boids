@@ -98,7 +98,7 @@ public class TestMonde {
 	public void testBehaviorExplode() throws Exception {
 		Monde monde = new Monde(10, 10);
 		monde.setBehavior(new BehaviorExplode());
-		Particule p1 = new Particule().withVitesse(new Vector2D(0.0, 1.0)).withPosition(new Point2D(5.0, 5.5)).withDistanceVision(1);
+		Particule p1 = new Particule().withVitesse(new Vector2D(0.0, 1.0)).withPosition(new Point2D(5.0, 7.5)).withDistanceVision(1);
 		Particule p2 = new Particule().withVitesse(new Vector2D(0.0, -1.0)).withPosition(new Point2D(5.0, 9)).withDistanceVision(3);
 		monde.add(p2);
 		monde.add(p1);
