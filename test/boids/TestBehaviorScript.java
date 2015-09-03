@@ -20,7 +20,7 @@ public class TestBehaviorScript {
 		}
 
 		@Override
-		public void add(Particule particule) throws OutOfBoundsException {
+		public void add(Objet objet) throws OutOfBoundsException, CloneNotSupportedException {
 		}
 	};
 
@@ -50,7 +50,7 @@ public class TestBehaviorScript {
 		List<Particule> aoe = new ArrayList<Particule>();
 		b.compute(ref, aoe, monde);
 
-		Vector2D r = monde.get(ref.getUuid()).getVitesse();
+		Vector2D r = ((Particule) monde.get(ref.getUuid())).getVitesse();
 
 		assertEquals(2.2, r.x, 0.00001);
 		assertEquals(5.68, r.y, 0.00001);

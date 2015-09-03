@@ -20,6 +20,7 @@ import util.Point2D;
 import util.Vector2D;
 import boids.BehaviorScript;
 import boids.Monde;
+import boids.Obstacle;
 import boids.Particule;
 
 public class FrameMain extends JFrame implements Runnable, WindowListener {
@@ -113,6 +114,8 @@ public class FrameMain extends JFrame implements Runnable, WindowListener {
 				.withCouleur(Color.GREEN.darker()));
 		monde.add(new Particule().withVitesse(new Vector2D(-1.0, -0.8)).withPosition(new Point2D(550.0, 300.0)).withDistanceVision(50.0)
 				.withCouleur(Color.YELLOW.darker()));
+
+		monde.add(new Obstacle().withRayon(120.0).withPosition(new Point2D(300.0, 300.0)));
 
 		// for (int i = 0; i < 100; ++i) {
 		// monde.addRandomParticule();

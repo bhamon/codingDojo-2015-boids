@@ -2,6 +2,7 @@ package boids;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.awt.Color;
@@ -15,7 +16,7 @@ import util.Vector2D;
 
 public class TestMonde {
 	@Test
-	public void testAddRandomParticule() {
+	public void testAddRandomParticule() throws Exception {
 		Monde monde = new Monde();
 		Particule particule = monde.addRandomParticule();
 
@@ -23,7 +24,7 @@ public class TestMonde {
 	}
 
 	@Test
-	public void testMondeExistantAvecUneParticule() throws OutOfBoundsException {
+	public void testMondeExistantAvecUneParticule() throws Exception {
 		Monde monde = new Monde();
 		Particule particule = new Particule();
 		monde.add(particule);
@@ -31,19 +32,12 @@ public class TestMonde {
 	}
 
 	@Test
-	public void testParticule() {
-		Particule particule = new Particule().withVitesse(new Vector2D(1.0, 1.0)).withPosition(new Point2D(0.0, 0.0)).withDistanceVision(2.5);
-		Assert.assertNotEquals(new Vector2D(0.0, 1.0), particule.getVitesse());
-		Assert.assertEquals(particule.getVitesse(), new Vector2D(1.0, 1.0));
-		Assert.assertEquals(particule.getPosition(), new Point2D(0.0, 0.0));
-		Assert.assertEquals(particule.getDistanceVision(), 2.5, 0.0);
-	}
-
-	@Test
-	public void testMondeAvecDeuxParticules() throws OutOfBoundsException {
+	public void testMondeAvecDeuxParticules() throws OutOfBoundsException, CloneNotSupportedException {
 		Monde monde = new Monde(10, 10);
-		Particule particuleGauche = new Particule().withVitesse(new Vector2D(1.0, 0.0)).withPosition(new Point2D(5.0, 0)).withDistanceVision(1);
-		Particule particuleDroite = new Particule().withVitesse(new Vector2D(-1.0, 0.0)).withPosition(new Point2D(5.0, 9)).withDistanceVision(2);
+		Particule particuleGauche = (Particule) new Particule().withDistanceVision(1).withVitesse(new Vector2D(1.0, 0.0))
+				.withPosition(new Point2D(5.0, 0));
+		Particule particuleDroite = (Particule) new Particule().withDistanceVision(2).withVitesse(new Vector2D(-1.0, 0.0))
+				.withPosition(new Point2D(5.0, 9));
 		monde.add(particuleDroite);
 		monde.add(particuleGauche);
 		// test ok car l'ajout des deux particules voulues ont été ajoutées
@@ -51,7 +45,7 @@ public class TestMonde {
 	}
 
 	@Test(expected = OutOfBoundsException.class)
-	public void testHorsMonde() throws OutOfBoundsException {
+	public void testHorsMonde() throws Exception {
 		Monde monde = new Monde(10, 10);
 		Particule particuleHorsMonde = new Particule().withVitesse(new Vector2D(1.0, 0.0)).withPosition(new Point2D(11.0, 0)).withDistanceVision(1);
 		monde.add(particuleHorsMonde);
@@ -59,7 +53,7 @@ public class TestMonde {
 	}
 
 	@Test
-	public void testCheckParticule() throws OutOfBoundsException {
+	public void testCheckParticule() throws Exception {
 		Monde monde = new Monde(10, 10);
 		Point2D p = new Point2D(2.0, 0.0);
 		Particule particule = new Particule().withVitesse(new Vector2D(1.0, 0.0)).withPosition(p).withDistanceVision(1);
@@ -69,7 +63,7 @@ public class TestMonde {
 	}
 
 	@Test
-	public void testMondeAvecDeuxParticulesAffichage() throws OutOfBoundsException {
+	public void testMondeAvecDeuxParticulesAffichage() throws Exception {
 		Monde monde = new Monde(10, 10);
 		Particule p1 = new Particule().withVitesse(new Vector2D(1.0, 0.0)).withPosition(new Point2D(5.0, 0)).withDistanceVision(1);
 		Particule p2 = new Particule().withVitesse(new Vector2D(-1.0, 0.0)).withPosition(new Point2D(5.0, 9)).withDistanceVision(2);
@@ -129,21 +123,21 @@ public class TestMonde {
 		monde.add(p1);
 		monde.animer();
 		Vector2D vitesseApresRebondP1 = new Vector2D(2.5, -1.5);
-		Assert.assertEquals(vitesseApresRebondP1, monde.get(p1UUID).getVitesse());
+		Assert.assertEquals(vitesseApresRebondP1, ((Particule) monde.get(p1UUID)).getVitesse());
 
 		Particule p2 = new Particule().withVitesse(new Vector2D(2.5, 1.5)).withPosition(new Point2D(9, 0)).withDistanceVision(1);
 		UUID p2UUID = p2.getUuid();
 		monde.add(p2);
 		monde.animer();
 		Vector2D vitesseApresRebondP2 = new Vector2D(-2.5, 1.5);
-		Assert.assertEquals(vitesseApresRebondP2, monde.get(p2UUID).getVitesse());
+		Assert.assertEquals(vitesseApresRebondP2, ((Particule) monde.get(p2UUID)).getVitesse());
 
 		Particule p3 = new Particule().withVitesse(new Vector2D(2.5, 1.5)).withPosition(new Point2D(9, 9)).withDistanceVision(1);
 		UUID p3UUID = p3.getUuid();
 		monde.add(p3);
 		monde.animer();
 		Vector2D vitesseApresRebondP3 = new Vector2D(-2.5, -1.5);
-		Assert.assertEquals(vitesseApresRebondP3, monde.get(p3UUID).getVitesse());
+		Assert.assertEquals(vitesseApresRebondP3, ((Particule) monde.get(p3UUID)).getVitesse());
 	}
 
 	@Test
@@ -205,13 +199,21 @@ public class TestMonde {
 	// a faire
 
 	@Test
-	public void testCommandModifySpeed() throws OutOfBoundsException {
+	public void testAjoutObstacle() throws OutOfBoundsException, CloneNotSupportedException {
+		Monde monde = new Monde(10, 10);
+		Obstacle obstacle = (Obstacle) new Obstacle().withRayon(1.3).withPosition(new Point2D(1.5, 2.48));
+		monde.add(obstacle);
+		assertNotNull(monde.get(obstacle.getUuid()));
+	}
+
+	@Test
+	public void testCommandModifySpeed() throws OutOfBoundsException, CloneNotSupportedException {
 		Monde monde = new Monde(10, 10);
 		Particule p1 = new Particule().withVitesse(new Vector2D(2.5, 1.5)).withPosition(new Point2D(0, 9)).withDistanceVision(1);
 		UUID p1UUID = p1.getUuid();
 		monde.add(p1);
 		MondeCommande mc = (MondeCommande) monde;
 		mc.modifySpeed(p1, new Vector2D(1.25, 0.45));
-		assertEquals(new Vector2D(1.25, 0.45), monde.get(p1UUID).getVitesse());
+		assertEquals(new Vector2D(1.25, 0.45), ((Particule) monde.get(p1UUID)).getVitesse());
 	}
 }

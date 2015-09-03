@@ -2,7 +2,7 @@ package util;
 
 import java.util.Objects;
 
-public final class Point2D {
+public final class Point2D implements Cloneable {
 	private static final double EPSILON = 0.0000001;
 
 	public final double x;
@@ -35,5 +35,10 @@ public final class Point2D {
 	@Override
 	public String toString() {
 		return "(" + x + ", " + y + ")";
+	}
+
+	@Override
+	public Point2D clone() {
+		return new Point2D(this.x, this.y);
 	}
 }

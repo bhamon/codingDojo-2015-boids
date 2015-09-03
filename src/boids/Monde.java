@@ -8,13 +8,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import util.Point2D;
 import util.Vector2D;
 
 public class Monde implements MondeCommande {
 
-	private final Map<UUID, Particule> listParticule;
+	private final Map<UUID, Objet> listobjet;
 	private double longueur;
 	private double largeur;
 	private Point2D spawn;
@@ -68,7 +69,7 @@ public class Monde implements MondeCommande {
 			throw new IllegalArgumentException("largeur ou longueur négative");
 		}
 
-		this.listParticule = new HashMap<UUID, Particule>();
+		this.listobjet = new HashMap<UUID, Objet>();
 		this.largeur = largeur;
 		this.longueur = longueur;
 		this.spawn = spawn;
@@ -99,36 +100,36 @@ public class Monde implements MondeCommande {
 		return largeur;
 	}
 
-	public Particule get(UUID uuid) {
-		Particule particule = listParticule.get(uuid);
-		if (particule == null) {
+	public Objet get(UUID uuid) throws CloneNotSupportedException {
+		Objet objet = listobjet.get(uuid);
+		if (objet == null) {
 			return null;
 		}
 
-		return particule.clone();
+		return objet.clone();
 	}
 
 	@Override
-	public void add(Particule particule) throws OutOfBoundsException {
-		if (particule == null) {
+	public void add(Objet objet) throws OutOfBoundsException, CloneNotSupportedException {
+		if (objet == null) {
 			throw new IllegalArgumentException("Particule ne peut pas être null");
 		}
 
-		Particule clonedParticule = (Particule) particule.clone();
-		Point2D position = clonedParticule.getPosition();
+		Objet clonedObjet = (Objet) objet.clone();
+		Point2D position = clonedObjet.getPosition();
 
 		if (!isInBounds(position)) {
 			throw new OutOfBoundsException("La particule est en dehors du monde");
 		}
 
-		listParticule.put(clonedParticule.getUuid(), clonedParticule);
+		listobjet.put(clonedObjet.getUuid(), clonedObjet);
 	}
 
 	public boolean contains(Particule particule) {
 		if (particule == null) {
 			throw new IllegalArgumentException("Particule ne peut pas être null");
 		}
-		return listParticule.containsKey(particule.getUuid());
+		return listobjet.containsKey(particule.getUuid());
 
 	}
 
@@ -137,9 +138,9 @@ public class Monde implements MondeCommande {
 		int ilargeur = (int) largeur;
 		int[][] grilleMonde = new int[iLongueur][ilargeur];
 
-		for (Particule particule : listParticule.values()) {
-			int posX = (int) particule.getPosition().x;
-			int posY = (int) particule.getPosition().y;
+		for (Objet objet : listobjet.values()) {
+			int posX = (int) objet.getPosition().x;
+			int posY = (int) objet.getPosition().y;
 			grilleMonde[posX][posY] = 1;
 		}
 
@@ -155,37 +156,44 @@ public class Monde implements MondeCommande {
 	}
 
 	public void paint(Graphics g) {
-		for (Particule particule : listParticule.values()) {
-			int posX = (int) particule.getPosition().x;
-			int posY = (int) particule.getPosition().y;
-			int r2 = (int) particule.getDistanceVision();
-			int d2 = (int) (particule.getDistanceVision() / 2.0);
-			int vX = (int) (particule.getVitesse().x * 10.0);
-			int vY = (int) (particule.getVitesse().y * 10.0);
-			g.setColor(particule.getCouleur());
-			// g.fillRect(posX, posY, 1, 1);
-			g.fillOval(posX - d2, posY - d2, r2, r2);
-			g.setColor(Color.WHITE);
-			g.drawLine(posX, posY, posX + vX, posY + vY);
+		for (Objet objet : listobjet.values()) {
+			objet.paint(g);
 		}
 	}
 
 	public void animer() throws Exception {
-		List<Particule> listParticuleClone = new ArrayList<Particule>(listParticule.values());
-		for (Particule particule : listParticuleClone) {
+		// @formatter:off
+		Stream<Particule> listParticules = new ArrayList<Objet>(listobjet.values())
+				.stream()
+				.filter((objet) -> objet instanceof Particule)
+				.map((objet) -> (Particule) objet);
+		Stream<Particule> listParticules3 = new ArrayList<Objet>(listobjet.values())
+				.stream()
+				.filter((objet) -> objet instanceof Particule)
+				.map((objet) -> (Particule) objet);
+		// @formatter:on
+
+		listParticules.forEach((particule) -> {
 			if (!particule.isShadow()) {
 				List<Particule> areaOfEffect = new ArrayList<Particule>();
-				for (Particule particule2 : listParticuleClone) {
+				Stream<Particule> listParticules2 = new ArrayList<Objet>(listobjet.values()).stream().filter((objet) -> objet instanceof Particule)
+						.map((objet) -> (Particule) objet);
+				listParticules2.forEach((particule2) -> {
 					if (!particule2.isShadow() && !particule.equals(particule2) && particule.particuleVoitAutreParticule(particule2)) {
 						areaOfEffect.add(particule2);
 					}
-				}
+				});
 
-				this.behavior.compute(particule, areaOfEffect, this);
+				try {
+					this.behavior.compute(particule, areaOfEffect, this);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
+	})	;
 
-		for (Particule particule : listParticule.values()) {
+		listParticules3.forEach((particule) -> {
 			Point2D posFinale = particule.getVitesse().translate(particule.getPosition());
 			if (isInBounds(posFinale)) {
 				particule.setPosition(posFinale);
@@ -202,14 +210,14 @@ public class Monde implements MondeCommande {
 
 				particule.setPosition(particule.getVitesse().translate(particule.getPosition()));
 			}
-		}
+		});
 	}
 
 	public boolean checkParticuleAtPosition(Point2D position) {
-		return listParticule.values().stream().anyMatch(particule -> particule.getPosition().equals(position));
+		return listobjet.values().stream().anyMatch(particule -> particule.getPosition().equals(position));
 	}
 
-	public Particule addRandomParticule() {
+	public Particule addRandomParticule() throws CloneNotSupportedException {
 		Vector2D vitesse = new Vector2D(10 - Math.random() * 20, 10 - Math.random() * 20);
 		Point2D position = new Point2D(Math.random() * longueur, Math.random() * largeur);
 		double distanceVision = Math.random() * 100.0;
@@ -241,14 +249,17 @@ public class Monde implements MondeCommande {
 	@Override
 	public void modifySpeed(Particule p1, Vector2D vitesseParticule) {
 		Objects.requireNonNull(p1);
-		if (listParticule.containsKey(p1.getUuid())) {
-			listParticule.get(p1.getUuid()).setVitesse(vitesseParticule);
+		if (listobjet.containsKey(p1.getUuid())) {
+			Objet objet = listobjet.get(p1.getUuid());
+			if (objet instanceof Particule) {
+				((Particule) objet).setVitesse(vitesseParticule);
+			}
 		}
 
 	}
 
 	public Object getParticulesNb() {
-		return listParticule.size();
+		return listobjet.size();
 	}
 
 }

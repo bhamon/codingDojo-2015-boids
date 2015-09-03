@@ -1,19 +1,15 @@
 package boids;
 
 import java.awt.Color;
+import java.awt.Graphics;
 import java.util.Objects;
-import java.util.UUID;
 
 import util.Point2D;
 import util.Vector2D;
 
-public class Particule implements Cloneable {
-
-	private final UUID uuid;
+public class Particule extends Objet implements Cloneable {
 
 	private Vector2D vitesse = new Vector2D();
-
-	private Point2D position = new Point2D();
 
 	private double distanceVision = 1.0;
 
@@ -24,11 +20,7 @@ public class Particule implements Cloneable {
 	private double dureeVie = Double.POSITIVE_INFINITY;
 
 	public Particule() {
-		this.uuid = UUID.randomUUID();
-	}
 
-	public Particule(UUID uuid) {
-		this.uuid = uuid;
 	}
 
 	public Particule withVitesse(Vector2D vitesse) {
@@ -37,8 +29,7 @@ public class Particule implements Cloneable {
 	}
 
 	public Particule withPosition(Point2D position) {
-		this.setPosition(position);
-		return this;
+		return (Particule) super.withPosition(position);
 	}
 
 	public Particule withShadow(boolean shadow) {
@@ -61,10 +52,6 @@ public class Particule implements Cloneable {
 		return this;
 	}
 
-	public UUID getUuid() {
-		return uuid;
-	}
-
 	public Vector2D getVitesse() {
 		return vitesse;
 	}
@@ -72,15 +59,6 @@ public class Particule implements Cloneable {
 	public void setVitesse(Vector2D vitesse) {
 		Objects.requireNonNull(vitesse);
 		this.vitesse = vitesse;
-	}
-
-	public Point2D getPosition() {
-		return position;
-	}
-
-	public void setPosition(Point2D position) {
-		Objects.requireNonNull(position);
-		this.position = position;
 	}
 
 	public boolean isShadow() {
@@ -122,9 +100,9 @@ public class Particule implements Cloneable {
 	}
 
 	@Override
-	public Particule clone() {
-		return new Particule(uuid).withPosition(position).withVitesse(vitesse).withDistanceVision(distanceVision).withDureeVie(dureeVie)
-				.withShadow(shadow).withCouleur(couleur);
+	public Particule clone() throws CloneNotSupportedException {
+		return ((Particule) super.clone()).withVitesse(vitesse).withDistanceVision(distanceVision).withDureeVie(dureeVie).withShadow(shadow)
+				.withCouleur(couleur);
 	}
 
 	@Override
@@ -136,4 +114,21 @@ public class Particule implements Cloneable {
 		Particule p = (Particule) obj;
 		return p.uuid == uuid;
 	}
+
+	@Override
+	public void paint(Graphics g) {
+		super.paint(g);
+		int posX = (int) this.getPosition().x;
+		int posY = (int) this.getPosition().y;
+		int r2 = (int) this.getDistanceVision();
+		int d2 = (int) (this.getDistanceVision() / 2.0);
+		int vX = (int) (this.getVitesse().x * 10.0);
+		int vY = (int) (this.getVitesse().y * 10.0);
+		g.setColor(this.getCouleur());
+		// g.fillRect(posX, posY, 1, 1);
+		g.fillOval(posX - d2, posY - d2, r2, r2);
+		g.setColor(Color.WHITE);
+		g.drawLine(posX, posY, posX + vX, posY + vY);
+	}
+
 }
