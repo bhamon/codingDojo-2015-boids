@@ -12,8 +12,19 @@ import java.util.stream.Stream;
 
 import util.Point2D;
 import util.Vector2D;
+import annotations.ApiObject;
+import annotations.ApiResource;
 
+@ApiObject(name = "monde")
 public class Monde implements MondeCommande {
+
+	private static class StaticHolder {
+		private static Monde instance = new Monde(600, 600);
+	}
+
+	public static Monde getInstance() {
+		return StaticHolder.instance;
+	}
 
 	private final Map<UUID, Objet> listobjet;
 	private double longueur;
@@ -260,6 +271,12 @@ public class Monde implements MondeCommande {
 
 	public Object getParticulesNb() {
 		return listobjet.size();
+	}
+
+	@ApiResource(name = "particules")
+	public List<Objet> getListobjet() {
+		List<Objet> result = new ArrayList<>(listobjet.values());
+		return result;
 	}
 
 }
