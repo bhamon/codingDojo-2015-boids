@@ -2,6 +2,7 @@ package boids;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.lang.Thread.State;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,18 +19,10 @@ import annotations.ApiResource;
 @ApiObject(name = "monde")
 public class Monde implements MondeCommande {
 
-	private static class StaticHolder {
-		private static Monde instance = new Monde(600, 600);
-	}
-
-	public static Monde getInstance() {
-		return StaticHolder.instance;
-	}
-
-	private final Map<UUID, Objet> listobjet;
-	private double longueur;
-	private double largeur;
-	private Point2D spawn;
+	private final Map<UUID, Objet> listobjet = new HashMap<UUID, Objet>();
+	private double longueur = 600;
+	private double largeur = 600;
+	private Point2D spawn = new Point2D(0, 0);
 	private Behavior behavior = defaultBehavior;
 
 	public Behavior getBehavior() {
@@ -75,32 +68,32 @@ public class Monde implements MondeCommande {
 		}
 	};
 
-	public Monde(double longueur, double largeur, Point2D spawn, Behavior behavior) {
-		if (longueur <= 0 || largeur <= 0) {
-			throw new IllegalArgumentException("largeur ou longueur négative");
-		}
-
-		this.listobjet = new HashMap<UUID, Objet>();
-		this.largeur = largeur;
-		this.longueur = longueur;
-		this.spawn = spawn;
-		this.behavior = behavior;
-	}
-
-	public Monde(double longueur, double largeur) {
-		this(longueur, largeur, new Point2D(longueur / 2.0, largeur / 2.0));
-	}
-
-	public Monde(double longueur, double largeur, Point2D spawn) {
-		this(longueur, largeur, spawn, defaultBehavior);
-	}
-
-	public Monde(double longueur, double largeur, Behavior behavior) {
-		this(longueur, largeur, new Point2D(longueur / 2.0, largeur / 2.0), behavior);
-	}
+//	private Monde(double longueur, double largeur, Point2D spawn, Behavior behavior) {
+//		if (longueur <= 0 || largeur <= 0) {
+//			throw new IllegalArgumentException("largeur ou longueur negative");
+//		}
+//
+//		this.listobjet = new HashMap<UUID, Objet>();
+//		this.largeur = largeur;
+//		this.longueur = longueur;
+//		this.spawn = spawn;
+//		this.behavior = behavior;
+//	}
+//
+//	private Monde(double longueur, double largeur) {
+//		this(longueur, largeur, new Point2D(longueur / 2.0, largeur / 2.0));
+//	}
+//
+//	private Monde(double longueur, double largeur, Point2D spawn) {
+//		this(longueur, largeur, spawn, defaultBehavior);
+//	}
+//
+//	private Monde(double longueur, double largeur, Behavior behavior) {
+//		this(longueur, largeur, new Point2D(longueur / 2.0, largeur / 2.0), behavior);
+//	}
 
 	public Monde() {
-		this(10, 10);
+		
 	}
 
 	public double getLongueur() {
@@ -123,7 +116,7 @@ public class Monde implements MondeCommande {
 	@Override
 	public void add(Objet objet) throws OutOfBoundsException, CloneNotSupportedException {
 		if (objet == null) {
-			throw new IllegalArgumentException("Particule ne peut pas être null");
+			throw new IllegalArgumentException("Particule ne peut pas etre null");
 		}
 
 		Objet clonedObjet = (Objet) objet.clone();
@@ -138,7 +131,7 @@ public class Monde implements MondeCommande {
 
 	public boolean contains(Particule particule) {
 		if (particule == null) {
-			throw new IllegalArgumentException("Particule ne peut pas être null");
+			throw new IllegalArgumentException("Particule ne peut pas etre null");
 		}
 		return listobjet.containsKey(particule.getUuid());
 
@@ -269,7 +262,7 @@ public class Monde implements MondeCommande {
 
 	}
 
-	public Object getParticulesNb() {
+	public int getParticulesNb() {
 		return listobjet.size();
 	}
 
@@ -279,4 +272,19 @@ public class Monde implements MondeCommande {
 		return result;
 	}
 
+	public Monde withLargeur(int i) {
+		this.largeur = i;
+		return this;
+	}
+
+	public Monde withLongueur(int i) {
+		this.longueur = i;
+		return this;
+	}
+
+	public Monde withSpawn(Point2D spawn) {
+		this.spawn = spawn;
+		return this;
+	}
+	
 }
