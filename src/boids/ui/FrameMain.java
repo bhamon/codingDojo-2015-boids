@@ -38,7 +38,7 @@ public class FrameMain extends JFrame implements Runnable, WindowListener {
 	public static Monde getInstance() {
 		return StaticHolder.instance;
 	}
-	
+
 	public FrameMain(Monde monde) {
 		this.monde = monde;
 		panel = new PanelMonde(this.monde);
@@ -50,8 +50,7 @@ public class FrameMain extends JFrame implements Runnable, WindowListener {
 		JMenuItem menuItemAnimationStart = new JMenuItem("Start");
 		JMenuItem menuItemAnimationStop = new JMenuItem("Stop");
 
-		menuItemAnimationStart.setAccelerator(KeyStroke.getKeyStroke(
-				KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK));
+		menuItemAnimationStart.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK));
 		menuItemAnimationStart.addActionListener(new ActionListener() {
 
 			@Override
@@ -62,8 +61,7 @@ public class FrameMain extends JFrame implements Runnable, WindowListener {
 			}
 		});
 
-		menuItemAnimationStop.setAccelerator(KeyStroke.getKeyStroke(
-				KeyEvent.VK_X, KeyEvent.CTRL_DOWN_MASK));
+		menuItemAnimationStop.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X, KeyEvent.CTRL_DOWN_MASK));
 		menuItemAnimationStop.addActionListener(new ActionListener() {
 
 			@Override
@@ -76,13 +74,10 @@ public class FrameMain extends JFrame implements Runnable, WindowListener {
 		menuItemAnimationStop.setEnabled(false);
 
 		JMenuItem menuItemBehaviorLoadFromJar = new JMenuItem("Load from JAR");
-		JMenuItem menuItemBehaviorLoadFromScript = new JMenuItem(
-				"Load from script");
+		JMenuItem menuItemBehaviorLoadFromScript = new JMenuItem("Load from script");
 
-		menuItemBehaviorLoadFromJar.setAccelerator(KeyStroke.getKeyStroke(
-				KeyEvent.VK_L, KeyEvent.CTRL_DOWN_MASK));
-		menuItemBehaviorLoadFromScript.setAccelerator(KeyStroke.getKeyStroke(
-				KeyEvent.VK_M, KeyEvent.CTRL_DOWN_MASK));
+		menuItemBehaviorLoadFromJar.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L, KeyEvent.CTRL_DOWN_MASK));
+		menuItemBehaviorLoadFromScript.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_M, KeyEvent.CTRL_DOWN_MASK));
 
 		JMenu menuAnimation = new JMenu("Animation");
 		menuAnimation.add(menuItemAnimationStart);
@@ -99,14 +94,10 @@ public class FrameMain extends JFrame implements Runnable, WindowListener {
 				int retour = fileChooser.showOpenDialog(FrameMain.this);
 				if (retour == JFileChooser.APPROVE_OPTION) {
 					try {
-						BehaviorScript scriptChosen = BehaviorScript
-								.loadBehaviorFile(fileChooser.getSelectedFile()
-										.getAbsolutePath());
+						BehaviorScript scriptChosen = BehaviorScript.loadBehaviorFile(fileChooser.getSelectedFile().getAbsolutePath());
 						FrameMain.this.monde.setBehavior(scriptChosen);
 					} catch (Exception e1) {
-						JOptionPane.showMessageDialog(FrameMain.this,
-								"Une erreur s'est produite pendant le chargement : \n"
-										+ e1.getMessage());
+						JOptionPane.showMessageDialog(FrameMain.this, "Une erreur s'est produite pendant le chargement : \n" + e1.getMessage());
 					}
 				}
 			}
@@ -121,28 +112,23 @@ public class FrameMain extends JFrame implements Runnable, WindowListener {
 		getContentPane().add(panel);
 	}
 
-	public static EmbeddedTomcat embeddedTomcat = new EmbeddedTomcat();
-	
+	public static EmbeddedTomcat embeddedTomcat = new EmbeddedTomcat(getInstance());
+
 	public static void main(String[] args) throws Exception {
 		Thread tomcatThread = new Thread(embeddedTomcat);
 		tomcatThread.start();
-		
-		Monde monde = FrameMain.getInstance().withLargeur(600).withLongueur(600);
-		monde.add(new Particule().withVitesse(new Vector2D(1.0, 0.0))
-				.withPosition(new Point2D(50.0, 100.0))
-				.withDistanceVision(50.0).withCouleur(Color.BLUE.darker()));
-		monde.add(new Particule().withVitesse(new Vector2D(-1.0, 0.0))
-				.withPosition(new Point2D(550.0, 100.0))
-				.withDistanceVision(50.0).withCouleur(Color.RED.darker()));
-		monde.add(new Particule().withVitesse(new Vector2D(1.0, 0.8))
-				.withPosition(new Point2D(50.0, 300.0))
-				.withDistanceVision(50.0).withCouleur(Color.GREEN.darker()));
-		monde.add(new Particule().withVitesse(new Vector2D(-1.0, -0.8))
-				.withPosition(new Point2D(550.0, 300.0))
-				.withDistanceVision(50.0).withCouleur(Color.YELLOW.darker()));
 
-		monde.add(new Obstacle().withRayon(120.0).withPosition(
-				new Point2D(300.0, 300.0)));
+		Monde monde = FrameMain.getInstance().withLargeur(600).withLongueur(600);
+		monde.add(new Particule().withVitesse(new Vector2D(1.0, 0.0)).withPosition(new Point2D(50.0, 100.0)).withDistanceVision(50.0)
+				.withCouleur(Color.BLUE.darker()));
+		monde.add(new Particule().withVitesse(new Vector2D(-1.0, 0.0)).withPosition(new Point2D(550.0, 100.0)).withDistanceVision(50.0)
+				.withCouleur(Color.RED.darker()));
+		monde.add(new Particule().withVitesse(new Vector2D(1.0, 0.8)).withPosition(new Point2D(50.0, 300.0)).withDistanceVision(50.0)
+				.withCouleur(Color.GREEN.darker()));
+		monde.add(new Particule().withVitesse(new Vector2D(-1.0, -0.8)).withPosition(new Point2D(550.0, 300.0)).withDistanceVision(50.0)
+				.withCouleur(Color.YELLOW.darker()));
+
+		monde.add(new Obstacle().withRayon(120.0).withPosition(new Point2D(300.0, 300.0)));
 
 		// for (int i = 0; i < 100; ++i) {
 		// monde.addRandomParticule();

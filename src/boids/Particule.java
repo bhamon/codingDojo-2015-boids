@@ -3,6 +3,7 @@ package boids;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.util.Objects;
+import java.util.UUID;
 
 import util.Point2D;
 import util.Vector2D;
@@ -20,7 +21,10 @@ public class Particule extends Objet implements Cloneable {
 	private double dureeVie = Double.POSITIVE_INFINITY;
 
 	public Particule() {
+	}
 
+	public Particule(UUID uuid) {
+		super(uuid);
 	}
 
 	public Particule withVitesse(Vector2D vitesse) {

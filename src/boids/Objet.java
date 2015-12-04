@@ -46,4 +46,5 @@ public abstract class Objet implements Cloneable {
 	public void paint(Graphics g) {
 	}
 
+	// public String
 }
